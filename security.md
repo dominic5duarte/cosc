@@ -32,6 +32,7 @@ for /L %i in (1,1,255) do @ping -n 1 -w 200 192.168.1.%i > nul && echo 192.168.1
 ssh -S /tmp/jump jump            -O forward -D9050 
      ^             ^                ^
   No loggin   Device name      Dynamic forward
+ssh -S /tmp/jump jump -O forward -D9050
 ## proxychains nmap scan for open ports
 ```
 nmap -sS -Pn 8.8.8.8 -p 135-139,22,80,443,21,8080
