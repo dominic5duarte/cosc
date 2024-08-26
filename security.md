@@ -736,4 +736,81 @@ Encrypted Transport
 scp <source> <destination>
 ncat --ssl <ip> <port> < <file>
 ```
-# cat etc/host on linux machines first
+# cat etc/host on linux machines first + check persistance (cronjob and stuff)
+# Privilege Escalation, Persistence & Covering Your Tracks (Windows)
+```
+DLL Search Order
+Executables check the following locations (in successive order):
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs
+The directory the the Application was run from
+The directory specified in in the C+ function GetSystemDirectory()
+The directory specified in the C+ function GetWindowsDirectory()
+The current directory
+```
+# Windows Integrity Mechanism
+```
+        Integrity Levels
+Untrusted: Anonymous SID access tokens
+Low: Everyone SID access token (World)
+Medium: Authenticated Users
+High: Administrators
+System: System services (LocalSystem, LocalService, NetworkService)(services and scheduled tasks)
+```
+# User Account Control (UAC)
+```
+Always Notify
+Notify me only when programs try to make changes to my computer
+Notify me only when programs try to make changes to my computer (do not dim my desktop)
+Never notify
+```
+# Checking UAC Settings
+```
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+```
+# AutoElevate Executables
+```
+get-psdrive
+cd to drive
+.\sigcheck.exe -m -accepteula C:\windows\system32\file
+Requested Execution Levels:
+ asInvoker
+ highestAvailable
+```
+# Scheduled Tasks & Services
+```
+Items to evaluate include:
+Write Permissions
+Non-Standard Locations
+Unquoted Executable Paths
+Vulnerabilities in Executables
+Permissions to Run As SYSTEM
+```
+# Finding vulnerable Scheduled Tasks
+```
+schtasks /query /fo LIST /v
+```
+# DLL Hijacking
+```
+Identify Vulnerability
+Take advantage of the default search order for DLLs
+NAME_NOT_FOUND present in executable’s system calls
+Validate permissions
+Create and transfer Malicious DLL
+```
+# Finding Vulnerable Services
+```
+wmic service list full
+sc query
+```
+sc.exe to create service
+sc.exe create puttyService binPath='C:\Program Files (x86)\Putty\putty.exe' displayname='puttyService start=auto
+open task scheduler
+new task, name it then click new, triggers tab, at startup, Actions tab, new, browse for location and then ok, general tab, change user, search for system then ok
+
+look at services on windows machine to find anything that does not have description or mispellings
+icacls 'C:\Program Files (x86)\Putty' /grant BUILTIN\Users:W
+net use z: "\\http://live.sysinternals.com" /persistent:yes
+cd z:
+./procmon.exe -accepteula
+filter -> process name contains putty.exe -> path contains dll -> result is NAME NOT FOUND
+if does not work run: (get-process | ?($_.name -like "putty")).kill()
