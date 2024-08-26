@@ -829,3 +829,36 @@ auditpol /get /category:*
 What does the below command show?
 auditpol /get /category:* | findstr /i "success failure"
 ```
+# Event Logging (just run event viewer windows event log viewer)
+```
+Storage: c:\windows\system32\config\
+
+File-Type: .evtx/.evt
+
+wevtutil el
+wmic ntevent where "logfile="<LOGNAME>" list full
+```
+# PowerShell Logging
+```
+Windows CLI CMD history is per instance (doskey /history)
+Powershell can be set to log sessions
+ 2.0 little evidence
+  Nothing about what was executed
+ 3.0 Module logging (EventID 4103)
+ 4.0 Module logging
+ 5.0 Can set module, script block (EventID 4104) and transcription
+Get-Eventlog -List
+```
+# Additional Logging
+```
+Determine PS version (bunch of ways)
+reg query hklm\software\microsoft\powershell\3\powershellengine\
+
+powershell -command "$psversiontable"
+Determine if logging is set (PowerShell and WMIC)
+reg query [hklm or hkcu]\software\policies\microsoft\windows\powershell
+reg query hklm\software\microsoft\wbem\cimom \| findstr /i logging
+# 0 = no | 1 = errors | 2 = verbose
+WMIC Log Storage
+%systemroot%\system32\wbem\Logs\
+```
