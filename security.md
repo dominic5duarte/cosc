@@ -968,6 +968,7 @@ ausearch -ua edwards -ts yesterday -te now -i
 ```
 # SystemD
 ```
+Not persitant
 Utilzes journalctl
 journalctl _TRANSPORT=audit
 journalctl _TRANSPORT=audit | grep 603
@@ -1004,6 +1005,7 @@ Control your output with pipes | and more
 Before we start cleaning, save the INODE!
 Affect on the inode of using mv VS cp VS cat
 Know what we are removing (Entry times? IP? Whole file? Etc.)
+5 min with ssh
 ```
 # Cleaning The Logs (Basic)
 ```
@@ -1039,7 +1041,16 @@ Changing the change time requires changing the system time than touch the file. 
 Newer Rsyslog references /etc/rsyslog.d/* for settings/rules
 Older version only uses /etc/rsyslog.conf
 Find out
-grep "IncludeConfig" /etc/rsyslog.conf
+go into the files and read them
+```
+# Remote Logging
+```
+Run top to see if runnning
+Check the config!
+  Identify server being shipped to!
+  Identify which logs are being shipped
+Rsyslog? Need to be thorough!
+  New version references multiple files for rules
 ```
 # Reading Rsyslog
 ```
@@ -1052,7 +1063,8 @@ Rules filter out, and can use keyword or number
 kern.*                                                # All kernel messages, all severities
 mail.crit
 cron.!info,!debug
-*.*  @192.168.10.254:514                                                    # Old format
+*.*  @192.168.10.254:514    (one @ is udp @@ is tcp)                                                # Old format
 *.* action(type="omfwd" target="192.168.10.254" port="514" protocol="udp")   # New format
 #mail.*
 ```
+RFC 5424
