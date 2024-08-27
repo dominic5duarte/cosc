@@ -862,3 +862,197 @@ reg query hklm\software\microsoft\wbem\cimom \| findstr /i logging
 WMIC Log Storage
 %systemroot%\system32\wbem\Logs\
 ```
+# Priv esc, persistence & covering tracks linux
+# Enumerating For Privilege Escalation
+```
+sudo -l
+suid bit and sgid
+```
+# changing sudo permissions
+```
+root	ALL=(ALL:ALL) ALL (just change the user, root would change to bob)
+```
+# gtfo bins
+```
+https://gtfobins.github.io
+has a bunch of binarys to pass local restrictions
+```
+# SUID and SGID
+```
+find / -type f -perm /4000 -ls 2>/dev/null # Find SUID only files
+find / -type f -perm /2000 -ls 2>/dev/null # Find SGID only files
+find / -type f -perm /6000 -ls 2>/dev/null # Find SUID and/or SGID files
+```
+# examples of above
+```
+get on the box
+sudo -l (find what we can exploit)
+look it up on gtfo bin and do what it says
+if a * is at the end of a file path you can run any command after it example: /bin/cat /var/log/syslog* (what comes up from sudo -l) what we can do with it is sudo cat /var/log/syslog /etc/shadow
+if sudo -l does not work
+use the find commands to look at files with the suid or sgid bit turned on
+cross reference with gtfo bin to see if there is a exploit available for the binary file we found
+suid can just be ran dont need to move anything (do not run sudo install)
+```
+# Insecure permissions 
+```
+CRON
+World-Writable Files and Directories
+Dot'.' in PATH
+```
+# CRON
+```
+Scheduled tasks that run as root
+enumerate CRON
+crontab -l (lists out cronjobs for user you currently are)
+create a crontab
+crontab -e
+remove crontab
+crontab -r
+crontab -l/r/e -u <username> will do the commands for another user
+system level cronjobs are in /etc/crontab
+ls -l the things found to see what we can use/whats going on
+user level cronjobs: /var/spool/cron/crontabs/
+https://crontab.guru/ to help build cronjobs
+```
+# World-Writable files and folders
+```
+find world writeable
+find / -type d -perm /2 -ls 2>/dev/null
+/tmp is important
+ls -lisa or just la
+ls -latr most recent written file to bottom
+```
+# Dot '.' in PATH
+```
+means current working directory
+adding a . into the PATH
+PATH = .$PATH
+```
+# Vulnerable software abd services
+```
+"mess wuth the file as much as possible and see what it does" ssgt woods
+```
+# Persistance
+```
+Adding or Hijacking a User Account
+```
+# Covering your tracks
+```
+Plan
+ Prior Initial Access? After Initial Access? Before Exit? (Know the system!)
+   What will happen if I do X (What logging?)
+   Checks (Where are things?)
+   Hide (File locations, names, times)
+ When do you start covering your tracks?
+NIX-ism
+First thing: unset HISTFILE
+Need to be aware of of init system in use
+  SystemV, upstart, SystemD, to name a few
+  Determines what commands to use and logging structure
+```
+# Ways To Figure Out Init Type
+```
+ls -latr /proc/1/exe
+stat /sbin/init
+man init
+init --version
+ps -p 1
+```
+# Auditing SystemV
+```
+ausearch: Pulls from audit.log
+ausearch -p 22
+ausearch -m USER_LOGIN -sv no
+ausearch -ua edwards -ts yesterday -te now -i
+```
+# SystemD
+```
+Utilzes journalctl
+journalctl _TRANSPORT=audit
+journalctl _TRANSPORT=audit | grep 603
+```
+# Logs for Covering Tracks
+```
+Logs typically housed in /var/log & useful logs: 
+auth.log/secure    Logins/authentications
+lastlog            Each users' last successful login time
+btmp               Bad login attempts
+sulog              Usage of SU command
+utmp               Currently logged in users (W command)
+wtmp               Permanent record on user on/off
+```
+# Working With Logs
+```
+file /var/log/wtmp
+find /var/log -type f -mmin -10 2> /dev/null
+journalctl -f -u ssh
+journalctl -q SYSLOG_FACILITY=10 SYSLOG_FACILITY=4
+```
+# Reading Files
+```
+cat /var/log/auth.log | egrep -v "opened|closed"
+awk '/opened/' /var/log/auth.log
+last OR lastb OR lastlog
+strings OR dd            # for data files
+more /var/log/syslog
+head/tail
+Control your output with pipes | and more
+```
+# Cleaning The Logs
+```
+Before we start cleaning, save the INODE!
+Affect on the inode of using mv VS cp VS cat
+Know what we are removing (Entry times? IP? Whole file? Etc.)
+```
+# Cleaning The Logs (Basic)
+```
+Get rid of it
+rm -rf /var/log/...
+
+Clear It
+cat /dev/null > /var/log/...
+echo > /var/log/...
+```
+# Cleaning The Logs (Precise)
+```
+Always work off a backup!
+GREP (Remove)
+egrep -v '10:49*| 15:15:15' auth.log > auth.log2; cat auth.log2 > auth.log; rm auth.log2
+
+SED (Replace)
+cat auth.log > auth.log2; sed -i 's/10.16.10.93/136.132.1.1/g' auth.log2; cat auth.log2 > auth.log
+```
+# Timestomp (Nix)
+```
+Access: updated when opened or used (grep, ls, cat, etc)
+Modify: update content of file or saved
+Change: file attribute change, file modified, moved, owner, permission
+Timestomp (Nix)
+Easy with Nix vs Windows (Native change of Access & Modify times)
+touch -c -t 201603051015 1.txt   # Explicit
+touch -r 3.txt 1.txt    # Reference
+Changing the change time requires changing the system time than touch the file. Could cause serious issues!
+```
+# Rsyslog
+```
+Newer Rsyslog references /etc/rsyslog.d/* for settings/rules
+Older version only uses /etc/rsyslog.conf
+Find out
+grep "IncludeConfig" /etc/rsyslog.conf
+```
+# Reading Rsyslog
+```
+Utilizes severity (priority) and facility levels
+Rules filter out, and can use keyword or number
+<facility>.<priority>
+```
+# Rsyslog Examples
+```
+kern.*                                                # All kernel messages, all severities
+mail.crit
+cron.!info,!debug
+*.*  @192.168.10.254:514                                                    # Old format
+*.* action(type="omfwd" target="192.168.10.254" port="514" protocol="udp")   # New format
+#mail.*
+```
