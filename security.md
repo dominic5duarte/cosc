@@ -322,6 +322,7 @@ pwd
 /var/www/html for home directory of apache
 
 # uploading ssh key
+```
 ; mkdir [home directory]/.ssh (on webpage)
 ls -la ../../.ssh/ [on box]
 ssh-keygen -t rsa -b 4096 [on box to generate new ssh keys with no passphrases]
@@ -329,7 +330,7 @@ cat ls -la ../../.ssh/id_rsa.pub (copy the entire file)
 ; echo "(what you copied from ssh)" > [home directory]/.ssh/authorized_keys (on webpage)
 ;cat [home directory]/.ssh/authorized_keys (make sure it works)
 ssh -i ~/.ssh/id_rsa [user]@[ip] (on host)
-
+```
 
 # How to get cookies from a message box
 ```
