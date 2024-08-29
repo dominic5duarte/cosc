@@ -1107,14 +1107,6 @@ create master socket to new ip with the creds and make sure to run sudo -l. If s
 # Windows exploit
 listen on nc to ports and see if buffer overflow can be conducted, run through the steps and boom on device
 ```
-
-
-
-
-
-
-
-
 # good nmap scripts
 ```
 nmap --script http-enum <IP>
@@ -1128,6 +1120,7 @@ sudo tcpdump -i ens3 not port 3201 -XXvv
 Recon
 WebEx (minus XSS)
 Reverse engeneering (disassemble and figure out how to make it do what we want)
+if(x * 18 =72){<code>} do the math to figure out the problem (>>) is bitshift to the left to get the number cause it will shift what you put in to the right
 Exploit Development (Both linux and windows exploit)
 Post Ex (Check alot of places and recon the device and see what people are doing, cronjobs, remote logging, escalate privs both windows and linux)
 Win Ex
