@@ -1120,3 +1120,17 @@ listen on nc to ports and see if buffer overflow can be conducted, run through t
 nmap --script http-enum <IP>
 nmap -Pn -T5 -sT -p 80 --script http-sql-injection.nse <IP>
 ```
+# TCPDUMP
+sudo tcpdump -i ens3 not port 3201 -XXvv
+
+# EXAM
+```
+Recon
+WebEx (minus XSS)
+Reverse engeneering (disassemble and figure out how to make it do what we want)
+Exploit Development (Both linux and windows exploit)
+Post Ex (Check alot of places and recon the device and see what people are doing, cronjobs, remote logging, escalate privs both windows and linux)
+Win Ex
+Lin Ex
+questions are pointed and in sections of what techniques we should be using
+```
