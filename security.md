@@ -1118,7 +1118,7 @@ sudo tcpdump -i ens3 not port 3201 -XXvv
 # EXAM
 ```
 Recon
-WebEx (minus XSS)
+WebEx (minus XSS) input validation (test everything) find vulnerable field, test how many columns, golden rule(if its more than three display columns make sure to pad with numbers), malicious file upload steps, where its going, if we can upload, where we can run it, will not need to create payloads
 Reverse engeneering (disassemble and figure out how to make it do what we want)
 if(x * 18 =72){<code>} do the math to figure out the problem (>>) is bitshift to the left to get the number cause it will shift what you put in to the right
 Exploit Development (Both linux and windows exploit)
