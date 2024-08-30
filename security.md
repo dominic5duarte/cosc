@@ -10,7 +10,7 @@ Jump:
 xfreerdp /v:10.50.28.142 /u:student /p:ZgoxLDNLHlzqU1a /size:1920x1000 +clipboard
 # Linux OP:
 ```
-ssh student@10.50.27.207 -X
+ssh student@10.50.40.19 -X oE8th8eGgEm56Ne
 ```
 # CTFD server
 Username:
@@ -1148,4 +1148,8 @@ questions are pointed and in sections of what techniques we should be using
 16 # 0xf7f72c6b \x6b\x2c\xf7\xf7
 17 # buffer = "Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0A$
 18 print(buffer+eip+nop+buf)
+```
+# logon stuff
+```
+6	DODU-005-M	oE8th8eGgEm56Ne	10.50.40.19
 ```
