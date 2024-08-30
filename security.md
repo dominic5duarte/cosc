@@ -10,7 +10,7 @@ Jump:
 xfreerdp /v:10.50.28.142 /u:student /p:ZgoxLDNLHlzqU1a /size:1920x1000 +clipboard
 # Linux OP:
 ```
-ssh student@10.50.40.19 -X oE8th8eGgEm56Ne
+ssh student@10.50.27.207 -X oE8th8eGgEm56Ne
 ```
 # CTFD server
 Username:
